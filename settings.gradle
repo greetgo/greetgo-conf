@@ -1,4 +1,4 @@
-rootProject.name = 'greetgo.conf'
+rootProject.name = 'greetgo-conf'
 
 include "greetgo.conf"
 include "greetgo.conf.jdbc"
