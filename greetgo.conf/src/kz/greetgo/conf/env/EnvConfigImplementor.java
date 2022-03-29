@@ -30,14 +30,17 @@ public class EnvConfigImplementor {
     final         String   value;
     final         String   description;
     private final Class<?> paramType;
+    private final boolean  optional;
     public        Object   typedValue;
 
-    public Param(String methodName, String envName, String value, String description, Class<?> paramType) {
+    public Param(String methodName, String envName, String value, String description,
+                 Class<?> paramType, boolean optional) {
       this.methodName  = methodName;
       this.envName     = envName;
       this.value       = value;
       this.description = description;
       this.paramType   = paramType;
+      this.optional    = optional;
     }
 
     final List<String> errors = new ArrayList<>();
@@ -51,13 +54,13 @@ public class EnvConfigImplementor {
       try {
         typedValue = ConfUtil.convertToType(value, paramType);
       } catch (CannotConvertToType e) {
-        errors.addAll(splitToList((e.getMessage())));
+        errors.addAll(splitToList(e.getMessage()));
         if (e.getCause() != null) {
           errors.addAll(splitToList(e.getCause().getClass().getSimpleName() + " : " + e.getCause().getMessage()));
         }
       }
 
-      if (errors.isEmpty() && (value == null || value.trim().length() == 0)) {
+      if (errors.isEmpty() && !optional && (value == null || value.trim().length() == 0)) {
         errors.add("Значение не указано либо пустое");
       }
     }
@@ -116,14 +119,16 @@ public class EnvConfigImplementor {
       String value = envSource.getValue(envName.value());
 
       Description description = method.getAnnotation(Description.class);
+      EnvOptional envOptional = method.getAnnotation(EnvOptional.class);
 
       params.add(new Param(
         method.getName(),
         envName.value(),
         value,
         description == null ? "" : description.value(),
-        method.getReturnType())
-      );
+        method.getReturnType(),
+        envOptional != null
+      ));
 
     }
 
@@ -196,7 +201,9 @@ public class EnvConfigImplementor {
       throw new IllegalEnvValues(err.toString());
     }
 
-    Map<String, Object> methodNameValueMap = params.stream().collect(toMap(x -> x.methodName, x -> x.typedValue));
+    Map<String, Object> methodNameValueMap = params.stream()
+                                               .filter(x->x.typedValue != null)
+                                                   .collect(toMap(x -> x.methodName, x -> x.typedValue));
 
     //noinspection unchecked
     return (T) Proxy.newProxyInstance(configInterface.getClassLoader(), new Class[]{configInterface}, (proxy, method, args) -> {

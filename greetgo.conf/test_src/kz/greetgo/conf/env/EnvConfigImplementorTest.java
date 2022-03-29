@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EnvConfigImplementorTest {
 
   @Test
-  public void wrap() {
+  public void impl() {
 
     EnvSource envSource = name -> "MYBPM_AUX1_PORT".equals(name) ? "7788" : "[[" + name + "]]";
 
@@ -28,7 +28,7 @@ public class EnvConfigImplementorTest {
   }
 
   @Test
-  public void wrap_IllegalEnvValues() {
+  public void impl__IllegalEnvValues() {
 
     EnvSource envSource = name -> "asd";
 
@@ -52,7 +52,7 @@ public class EnvConfigImplementorTest {
   }
 
   @Test
-  public void wrap_IllegalEnvValues_2() {
+  public void impl__IllegalEnvValues_2() {
 
     EnvSource envSource = name -> null;
 
@@ -72,6 +72,80 @@ public class EnvConfigImplementorTest {
 
     assertThat(error).isNotNull();
     error.printStackTrace();
+
+  }
+
+  @Test
+  public void impl__EnvOptional__null() {
+
+    EnvSource envSource = name -> null;
+
+    //
+    //
+    TestValueOptional impl = EnvConfigImplementor.impl(TestValueOptional.class, envSource);
+    //
+    //
+
+    assertThat(impl.testValue()).isNull();
+
+  }
+
+  @Test
+  public void impl__EnvOptional__empty() {
+
+    EnvSource envSource = name -> "";
+
+    //
+    //
+    TestValueOptional impl = EnvConfigImplementor.impl(TestValueOptional.class, envSource);
+    //
+    //
+
+    assertThat(impl.testValue()).isEqualTo("");
+
+  }
+
+  @Test
+  public void impl__EnvMandatory__null() {
+
+    EnvSource envSource = name -> null;
+
+    RuntimeException error = null;
+    try {
+      //
+      //
+      EnvConfigImplementor.impl(TestValueMandatory.class, envSource);
+      //
+      //
+    } catch (RuntimeException e) {
+      error = e;
+    }
+
+    assertThat(error).isNotNull();
+    assertThat(error.getMessage()).contains("TEST_VALUE");
+    assertThat(error.getMessage()).contains("TestValueMandatory");
+
+  }
+
+  @Test
+  public void impl__EnvMandatory__empty() {
+
+    EnvSource envSource = name -> "";
+
+    RuntimeException error = null;
+    try {
+      //
+      //
+      EnvConfigImplementor.impl(TestValueMandatory.class, envSource);
+      //
+      //
+    } catch (RuntimeException e) {
+      error = e;
+    }
+
+    assertThat(error).isNotNull();
+    assertThat(error.getMessage()).contains("TEST_VALUE");
+    assertThat(error.getMessage()).contains("TestValueMandatory");
 
   }
 
