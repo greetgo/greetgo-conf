@@ -2,14 +2,14 @@ version: "2.3"
 services:
 
   postgres:
-    image: postgres:13.1
+    image: postgres:13.4
     mem_limit: 200M
     container_name: pg_greetgo_conf_jdbc
     restart: always
     ports:
       - "25432:5432"
     volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data
+      - ~/volumes/greetgo-conf/postgres:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: "111"
 
@@ -21,7 +21,7 @@ services:
     ports:
       - "23306:3306"
     volumes:
-      - ./volumes/mariadb:/var/lib/mysql
+      - ~/volumes/greetgo-conf/mariadb:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: "111"
 
@@ -30,26 +30,13 @@ services:
     mem_limit: 200M
     restart: always
     volumes:
-      - "./volumes/zookeeper/data:/var/lib/zookeeper/data"
-      - "./volumes/zookeeper/log:/var/lib/zookeeper/log"
+      - "~/volumes/greetgo-conf/zookeeper/data:/var/lib/zookeeper/data"
+      - "~/volumes/greetgo-conf/zookeeper/log:/var/lib/zookeeper/log"
     ports:
       - "51078:2181"
     environment:
       ZOOKEEPER_SERVER_ID: "1"
       ZOOKEEPER_CLIENT_PORT: "2181"
-
-#  zookeeper:
-#    image: zookeeper:3.6.2
-#    user: "0:0"
-#    mem_limit: 200M
-#    restart: always
-#    ports:
-#      - "51078:2181"
-#    volumes:
-#      - "./volumes/zookeeper/data:/data"
-#      - "./volumes/zookeeper/log:/datalog"
-#    environment:
-#      ZOO_MY_ID: 1
 
   zoonavigator:
     image: elkozmon/zoonavigator:1.1.0
