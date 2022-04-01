@@ -20,6 +20,8 @@ allprojects {
     // if (System.getenv('GG_REPO')?.trim()) maven { url System.getenv('GG_REPO').trim() }
     mavenCentral()
   }
+
+  install.group = "upload"
 }
 
 subprojects {
